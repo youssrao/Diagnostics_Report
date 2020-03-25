@@ -8,6 +8,21 @@
 
 import UIKit
 
+struct DiagnosticsInfo: Codable {
+    let modelName: String
+    let systemVersion: String
+    let appName: String?
+    let appVersion: String?
+    
+    init(modelName: String, systemVersion: String, appName: String?, appVersion: String?) {
+        self.modelName = modelName
+        self.systemVersion = systemVersion
+        self.appName = appName
+        self.appVersion = appVersion
+    }
+    
+}
+
 
 class ViewController: UIViewController {
 
@@ -28,6 +43,30 @@ class ViewController: UIViewController {
     
     
     @IBAction func generateReport(_ sender: UIButton) {
+        var totalDiskSpaceInBytes:Int64 {
+            get {
+                do {
+                    let systemAttributes = try FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory() as String)
+                    let space = (systemAttributes[FileAttributeKey.systemSize] as? NSNumber)?.int64Value
+                    return space!
+                } catch {
+                    return 0
+                }
+            }
+        }
+
+        var freeDiskSpaceInBytes:Int64 {
+            get {
+                do {
+                    let systemAttributes = try FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory() as String)
+                    let freeSpace = (systemAttributes[FileAttributeKey.systemFreeSize] as? NSNumber)?.int64Value
+                    return freeSpace!
+                } catch {
+                    return 0
+                }
+            }
+        }
+        
         print("Model:", UIDevice.current.modelName)
         print("System version:", UIDevice.current.systemVersion)
         
@@ -39,12 +78,16 @@ class ViewController: UIViewController {
             print("App version:", appVersion)
         }
         
+        print("Total Disk Space:", totalDiskSpaceInBytes.byteSize)
+        print("Free Disk Space:", freeDiskSpaceInBytes.byteSize)
     }
     
-    
-   
+}
 
-
+extension Int64 {
+    var byteSize: String {
+          return ByteCountFormatter().string(fromByteCount: Int64(self))
+    }
 }
 
 extension UIApplication {
